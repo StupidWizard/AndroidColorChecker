@@ -26,6 +26,7 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import java.io.File;
@@ -38,6 +39,7 @@ public class CamTestActivity extends Activity {
 
     private static final int CAMERA_REQUEST = 1888;
     private ImageViewTouch imageView;
+    private ImageView colorCard;
 
     Preview preview;
     Button buttonClick;
@@ -61,34 +63,14 @@ public class CamTestActivity extends Activity {
         ((FrameLayout) findViewById(R.id.layout)).addView(preview);
         preview.setKeepScreenOn(true);
 
+        colorCard = (ImageView) findViewById(R.id.color_mark);
+
         imageView = (ImageViewTouch) findViewById(R.id.image_view);
         imageView.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
-                int[] viewCoords = new int[2];
-                imageView.getLocationOnScreen(viewCoords);
-
-                int touchX = (int) motionEvent.getX();
-                int touchY = (int) motionEvent.getY();
-
-                int imageX = touchX - viewCoords[0]; // viewCoords[0] is the X coordinate
-                int imageY = touchY - viewCoords[1];
-
-                Log.e(TAG, "Touch at X = " + imageX + " Y = " + imageY);
-
-                Bitmap bitmap = ((BitmapDrawable)imageView.getDrawable()).getBitmap();
-                if (bitmap != null) {
-                    int pixel = bitmap.getPixel(imageX, imageY);
-
-                    //then do what you want with the pixel data, e.g
-                    int redValue = Color.red(pixel);
-                    int blueValue = Color.blue(pixel);
-                    int greenValue = Color.green(pixel);
-
-                    Log.e(TAG, "Color R = " + redValue + "  G = " + greenValue + "  B = " + blueValue);
-                }
-
-                return false;
+                processTouch(motionEvent.getX(), motionEvent.getY());
+                return true;
             }
         });
 
@@ -112,6 +94,8 @@ public class CamTestActivity extends Activity {
                             camera.takePicture(shutterCallback, rawCallback, jpegCallback);
                         } else {
                             imageView.setVisibility(View.INVISIBLE);
+                            colorCard.setVisibility(View.INVISIBLE);
+                            onUseCamera = true;
                         }
                     }
         		});
@@ -128,6 +112,32 @@ public class CamTestActivity extends Activity {
         //				return true;
         //			}
         //		});
+    }
+
+    private void processTouch(float posX, float posY) {
+        int[] viewCoords = new int[2];
+        imageView.getLocationOnScreen(viewCoords);
+
+        int touchX = (int) posX;
+        int touchY = (int) posY;
+
+        int imageX = touchX - viewCoords[0]; // viewCoords[0] is the X coordinate
+        int imageY = touchY - viewCoords[1];
+
+        Log.e(TAG, "Touch at X = " + imageX + " Y = " + imageY);
+
+        Bitmap bitmap = ((BitmapDrawable)imageView.getDrawable()).getBitmap();
+        if (bitmap != null) {
+            int pixel = bitmap.getPixel(imageX, imageY);
+
+            //then do what you want with the pixel data, e.g
+            int redValue = Color.red(pixel);
+            int blueValue = Color.blue(pixel);
+            int greenValue = Color.green(pixel);
+
+            Log.e(TAG, "Color R = " + redValue + "  G = " + greenValue + "  B = " + blueValue);
+            colorCard.setBackgroundColor(Color.argb(255, redValue, greenValue, blueValue));
+        }
     }
 
     @Override
@@ -252,10 +262,11 @@ public class CamTestActivity extends Activity {
 
                 imageView.setImageBitmap(rotatedBitmap);
                 onUseCamera = false;
-            }catch(IOException ex){
+                colorCard.setVisibility(View.VISIBLE);
+                imageView.setVisibility(View.VISIBLE);
+            } catch(IOException ex) {
                 Log.e(TAG, "Failed to get Exif data", ex);
             }
-
         }
     }
 

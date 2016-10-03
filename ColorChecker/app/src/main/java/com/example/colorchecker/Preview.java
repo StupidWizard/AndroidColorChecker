@@ -219,5 +219,4 @@ class Preview extends ViewGroup implements SurfaceHolder.Callback {
         }
         return cameraId;
     }
-
 }

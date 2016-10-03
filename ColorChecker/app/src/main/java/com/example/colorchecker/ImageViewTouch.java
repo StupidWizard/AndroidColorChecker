@@ -27,8 +27,4 @@ public class ImageViewTouch extends ImageView {
     public ImageViewTouch(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
     }
-
-    public void checkColor(int x, int y) {
-        
-    }
 }
